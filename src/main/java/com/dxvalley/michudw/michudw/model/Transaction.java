@@ -6,12 +6,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.Data;
 
-@Entity
 @Data
 public class Transaction {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
     private String bookDate;
     private String reference;
     private String descript;
@@ -22,6 +18,4 @@ public class Transaction {
     private String from;
     private String to;
     private String closingBalance;
-
-    // Getters and setters
 }
