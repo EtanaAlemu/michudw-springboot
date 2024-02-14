@@ -6,16 +6,23 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.Data;
 
+@Entity
 @Data
 public class Transaction {
-    private String bookDate;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String bookingDate;
+    private String txnAccount;
     private String reference;
-    private String descript;
+    private String description;
     private String narrative;
     private String valueDate;
     private String debit;
     private String credit;
-    private String from;
-    private String to;
+    private String fromAcct;
+    private String toAcct;
+    private String bbf;
     private String closingBalance;
+
 }
