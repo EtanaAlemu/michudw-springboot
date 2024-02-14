@@ -6,9 +6,11 @@ import lombok.Data;
 @Entity
 @Data
 public class Transaction {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id = null;
     private String bookingDate;
     private String txnAccount;
-    @EmbeddedId
     private String reference;
     private String description;
     private String narrative;
