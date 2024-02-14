@@ -55,7 +55,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
                     + "FROM TARGET.VW_GL_BAL_CRB_F A WHERE LINE_NO BETWEEN 3704 AND 4199 AND A.CONTRACT_CODE = :accountNumber AND A.business_date = :endDate) A2 ON A2.CONTRACT_CODE = B.TXN_ACCOUNT "
                     + "ORDER BY BOOKING_DATE")
     List<Transaction> findTransactions(
-            @Param("startDate") Date startDate,
-            @Param("endDate") Date endDate,
+            @Param("startDate") String startDate,
+            @Param("endDate") String endDate,
             @Param("accountNumber") String accountNumber);
 }

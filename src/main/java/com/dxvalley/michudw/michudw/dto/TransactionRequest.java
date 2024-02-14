@@ -5,7 +5,7 @@ import lombok.Data;
 import java.util.Date;
 @Data
 public class TransactionRequest {
-    private Date startDate;
-    private Date endDate;
+    private String startDate;
+    private String endDate;
     private String accountNumber;
 }
