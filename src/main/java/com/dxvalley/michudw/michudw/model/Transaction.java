@@ -1,17 +1,14 @@
 package com.dxvalley.michudw.michudw.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Data;
 
-//@Entity
+@Entity
 @Data
 public class Transaction {
-
     private String bookingDate;
     private String txnAccount;
+    @EmbeddedId
     private String reference;
     private String description;
     private String narrative;
