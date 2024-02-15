@@ -2,8 +2,6 @@ package com.dxvalley.michudw.michudw.dto;
 
 import lombok.Data;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 
 @Data
 public class TransactionResponse {
@@ -19,8 +17,4 @@ public class TransactionResponse {
     private String toacct;
     private String bbf;
     private String closingBalance;
-
-    public void setBookingDate(LocalDate bookingDate) {
-        this.bookingDate = bookingDate.format(DateTimeFormatter.ofPattern("dd MMM yy"));
-    }
 }
