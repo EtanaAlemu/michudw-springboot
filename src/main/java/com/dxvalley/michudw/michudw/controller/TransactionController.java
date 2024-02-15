@@ -25,7 +25,7 @@ public class TransactionController {
     @PostMapping("/transactions")
     public ResponseEntity<TransactionListResponse> getTransactions(@RequestBody TransactionRequest request) {
         List<Transaction> transactions = transactionRepository.findTransactions(
-                request.getStartDate(), request.getEndDate(), request.getAccountNumber());
+                request.getStartDate(), request.getEndDate(), request.getAccountNumber().toString());
         List<TransactionResponse> response = transactionMapper.mapTransactionsToResponse(transactions);
 
         TransactionListResponse responseBody = new TransactionListResponse();

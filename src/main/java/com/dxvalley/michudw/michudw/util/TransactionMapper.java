@@ -31,9 +31,6 @@ public class TransactionMapper {
         return transactionResponses;
     }
 
-    //    public TransactionResponse mapTransactionToResponse(Transaction transaction) {
-//        return modelMapper.map(transaction, TransactionResponse.class);
-//    }
     public TransactionResponse mapTransactionToResponse(Transaction transaction) {
         TransactionResponse response = modelMapper.map(transaction, TransactionResponse.class);
         response.setBookDate(formatDate(transaction.getBookingDate()));

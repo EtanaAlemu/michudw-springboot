@@ -7,5 +7,5 @@ import java.util.Date;
 public class TransactionRequest {
     private String startDate;
     private String endDate;
-    private String accountNumber;
+    private Long accountNumber;
 }

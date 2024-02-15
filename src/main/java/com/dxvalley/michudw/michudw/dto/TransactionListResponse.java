@@ -7,7 +7,7 @@ import java.util.List;
 public class TransactionListResponse {
     private String startDate;
     private String endDate;
-    private String accountNumber;
+    private Long accountNumber;
     private int transactionsCount;
     private List<TransactionResponse> transactions;
 }
