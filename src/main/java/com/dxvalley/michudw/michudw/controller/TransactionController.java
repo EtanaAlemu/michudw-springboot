@@ -1,5 +1,6 @@
 package com.dxvalley.michudw.michudw.controller;
 
+import com.dxvalley.michudw.michudw.dto.TransactionListResponse;
 import com.dxvalley.michudw.michudw.dto.TransactionRequest;
 import com.dxvalley.michudw.michudw.dto.TransactionResponse;
 import com.dxvalley.michudw.michudw.model.Transaction;
@@ -22,14 +23,19 @@ public class TransactionController {
     private TransactionMapper transactionMapper;
 
     @PostMapping("/transactions")
-    public ResponseEntity<List<TransactionResponse>> getTransactions(@RequestBody TransactionRequest request) {
+    public ResponseEntity<TransactionListResponse> getTransactions(@RequestBody TransactionRequest request) {
         List<Transaction> transactions = transactionRepository.findTransactions(
                 request.getStartDate(), request.getEndDate(), request.getAccountNumber());
-        System.out.println(transactions.get(0));
         List<TransactionResponse> response = transactionMapper.mapTransactionsToResponse(transactions);
-        System.out.println(response.get(0));
 
-        return ResponseEntity.ok(response);
+        TransactionListResponse responseBody = new TransactionListResponse();
+        responseBody.setStartDate(request.getStartDate());
+        responseBody.setEndDate(request.getEndDate());
+        responseBody.setAccountNumber(request.getAccountNumber());
+        responseBody.setTransactionsCount(transactions.size());
+        responseBody.setTransactions(response);
+
+        return ResponseEntity.ok(responseBody);
     }
 
 }
