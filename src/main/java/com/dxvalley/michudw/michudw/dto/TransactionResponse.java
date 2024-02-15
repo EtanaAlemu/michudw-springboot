@@ -5,16 +5,14 @@ import lombok.Data;
 
 @Data
 public class TransactionResponse {
-    private String bookingDate;
-    private String txnAccount;
+    private String bookDate;
     private String reference;
-    private String description;
-    private String narative;
+    private String descript;
+    private String narrative;
     private String valueDate;
     private String debit;
     private String credit;
-    private String fromacct;
-    private String toacct;
-    private String bbf;
+    private String from;
+    private String to;
     private String closingBalance;
 }

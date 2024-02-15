@@ -36,7 +36,16 @@ public class TransactionMapper {
 //    }
     public TransactionResponse mapTransactionToResponse(Transaction transaction) {
         TransactionResponse response = modelMapper.map(transaction, TransactionResponse.class);
-        response.setBookingDate(formatDate(transaction.getBookingDate())); // Mapping bookingDate to bookDate
+        response.setBookDate(formatDate(transaction.getBookingDate()));
+        response.setReference(transaction.getReference());
+        response.setDescript(transaction.getDescription());
+        response.setNarrative(transaction.getNarative());
+        response.setValueDate(formatDate(transaction.getValueDate()));
+        response.setDebit(transaction.getDebit());
+        response.setCredit(transaction.getCredit());
+        response.setFrom(transaction.getFromacct());
+        response.setTo(transaction.getToacct());
+        response.setClosingBalance(transaction.getClosingBalance());
         return response;
     }
 
