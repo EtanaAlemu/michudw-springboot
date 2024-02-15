@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -40,7 +41,9 @@ public class TransactionMapper {
     }
 
     private String formatDate(String sDate) {
-        LocalDate localDate = LocalDate.parse(sDate);
+        LocalDateTime dateTime = LocalDateTime.parse(sDate, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        // Convert LocalDateTime to LocalDate
+        LocalDate localDate = dateTime.toLocalDate();
         // Format LocalDate to desired format "28 APR 22"
         return localDate.format(DateTimeFormatter.ofPattern("dd MMM yy", Locale.ENGLISH));
     }
