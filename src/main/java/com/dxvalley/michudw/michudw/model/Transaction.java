@@ -12,7 +12,7 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String reference;
     private String description;
-    private String narrative;
+    private String narative;
     private String valueDate;
     private String debit;
     private String credit;
