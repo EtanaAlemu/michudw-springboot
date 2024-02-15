@@ -27,6 +27,7 @@ public class TransactionController {
                 request.getStartDate(), request.getEndDate(), request.getAccountNumber());
         System.out.println(transactions.get(0));
         List<TransactionResponse> response = transactionMapper.mapTransactionsToResponse(transactions);
+        System.out.println(response.get(0));
 
         return ResponseEntity.ok(response);
     }
