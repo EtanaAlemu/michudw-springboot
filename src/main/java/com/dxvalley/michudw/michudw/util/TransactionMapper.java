@@ -9,10 +9,8 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -40,8 +38,8 @@ public class TransactionMapper {
         response.setValueDate(formatDate(transaction.getValueDate()));
         response.setDebit(transaction.getDebit());
         response.setCredit(transaction.getCredit());
-        response.setFrom(transaction.getFromacct());
-        response.setTo(transaction.getToacct());
+        response.setFrom(transaction.getDebitAcctNo());
+        response.setTo(transaction.getTo());
         response.setClosingBalance(transaction.getClosingBalance());
         return response;
     }

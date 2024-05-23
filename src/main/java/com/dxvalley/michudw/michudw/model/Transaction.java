@@ -7,7 +7,6 @@ import lombok.Data;
 @Data
 public class Transaction {
     private String bookingDate;
-    private String txnAccount;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String reference;
@@ -16,8 +15,8 @@ public class Transaction {
     private String valueDate;
     private String debit;
     private String credit;
-    private String fromacct;
-    private String toacct;
+    private String debitAcctNo;
+    private String to;
     private String bbf;
     private String closingBalance;
 
