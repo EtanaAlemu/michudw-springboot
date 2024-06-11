@@ -14,11 +14,75 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
 
     @Query(nativeQuery = true, value =
-            "WITH MVMT AS( SELECT BUSINESS_DATE AS BOOKING_DATE, CREDIT_ACCT_NO AS TXNACCOUNTS, TXN_REF_NO AS REFERENCE, (SELECT DEBIT_THEIR_REF FROM STAGE.EFZ_FUNDS_TRANSFER A WHERE A.REF_NO = F.TXN_REF_NO ) AS DESCRIPTION, NULL AS NARATIVE, CREDIT_VALUE_DATE AS VALUE_DATE, NULL AS DEBIT, CREDIT_LOCAL_AMOUNT AS CREDIT, DEBIT_ACCT_NO, CREDIT_ACCT_NO AS TOACCT, PAYMENT_DETAILS FROM TARGET.W_FUNDS_MVMT_TXN_F F WHERE BUSINESS_DATE BETWEEN :startDate AND :endDate AND CREDIT_ACCT_NO =:accountNumber UNION ALL SELECT BUSINESS_DATE AS BOOKING_DATE, DEBIT_ACCT_NO AS TXNACCOUNTS, TXN_REF_NO AS REFERENCE, (SELECT DEBIT_THEIR_REF FROM STAGE.EFZ_FUNDS_TRANSFER A WHERE A.REF_NO = F.TXN_REF_NO ) AS DESCRIPTION,  NULL AS NARATIVE, DEBIT_VALUE_DATE AS VALUE_DATE, CREDIT_LOCAL_AMOUNT AS DEBIT, NULL AS CREDIT, DEBIT_ACCT_NO, CREDIT_ACCT_NO AS TOACCT, PAYMENT_DETAILS FROM TARGET.W_FUNDS_MVMT_TXN_F F WHERE BUSINESS_DATE BETWEEN :startDate AND :endDate AND DEBIT_ACCT_NO = :accountNumber) SELECT    B.BOOKING_DATE,   REFERENCE, DESCRIPTION, NARATIVE, VALUE_DATE, DEBIT, CREDIT, DEBIT_ACCT_NO , TOACCT AS \"TO\", INITAL_Balance, PAYMENT_DETAILS AS \"Description\", CASE WHEN B.BOOKING_DATE = (SELECT MIN(D.BUSINESS_DATE) FROM TARGET.W_DATE_D D WHERE D.BUSINESS_DATE >= :startDate) THEN A1.LCY_CLOSING_BALANCE END AS BBF, CASE WHEN B.BOOKING_DATE = (SELECT MAX(D.BOOKING_DATE)  FROM MVMT D WHERE D.BOOKING_DATE <= :endDate)   THEN A2.LCY_CLOSING_BALANCE END AS Closing_Balance FROM MVMT B JOIN (SELECT A.business_date, A.CONTRACT_CODE, A.LCY_CLOSING_BALANCE FROM TARGET.VW_GL_BAL_CRB_F A WHERE LINE_NO BETWEEN 3704 AND 4199  AND A.CONTRACT_CODE = :accountNumber       AND A.business_date= (SELECT MAX(D.BUSINESS_DATE) FROM TARGET.W_DATE_D D WHERE D.BUSINESS_DATE < :startDate)  )A1 ON A1.CONTRACT_CODE  = B.TXNACCOUNTS  JOIN (SELECT A.business_date, A.CONTRACT_CODE, A.LCY_CLOSING_BALANCE      FROM TARGET.VW_GL_BAL_CRB_F A WHERE LINE_NO BETWEEN 3704 AND 4199 AND A.CONTRACT_CODE = :accountNumber       AND A.business_date= (SELECT MAX(D.BUSINESS_DATE) FROM TARGET.W_DATE_D D WHERE D.BUSINESS_DATE <= :endDate) )A2 ON A2.CONTRACT_CODE  = B.TXNACCOUNTS  LEFT JOIN (SELECT A.CONTRACT_CODE, AF.BUSINESS_DATE, AF.LCY_CLOSING_BALANCE AS INITAL_Balance      FROM TARGET.W_ACCOUNT_STATIC_D A JOIN TARGET.VW_GL_BAL_CRB_F AF ON A.CONTRACT_CODE = AF.CONTRACT_CODE       WHERE A.STATUS = 'Y' AND LINE_NO BETWEEN 3704 AND 4198 AND A.CONTRACT_CODE = :accountNumber AND      AF.BUSINESS_DATE  = (SELECT MIN(D.BUSINESS_DATE)  FROM TARGET.W_DATE_D D ))A3 ON A3.CONTRACT_CODE = B.TXNACCOUNTS ORDER BY BOOKING_DATE"
+            "select stmt.*\n" +
+                    ",(select ACCOUNT_TITLE_1 from W_ACCOUNT_STATIC_D@DATA21 where contract_code=stmt.dr_acc_no and  status='Y') as Dr_account_name\n" +
+                    ",(select ACCOUNT_TITLE_1 from W_ACCOUNT_STATIC_D@DATA21 where contract_code=stmt.cr_acc_no and  status='Y') as Cr_account_name\n" +
+                    ",(select branch_name from W_COMPANY_D@DATA21 where BRANCH_CODE=stmt.DEBIT_COMPANY_CODE) Debit_br_name\n" +
+                    ",(select branch_name from W_COMPANY_D@DATA21 where BRANCH_CODE=stmt.CREDIT_COMPANY_CODE) Credit_br_name\n" +
+                    "from\n" +
+                    "(\n" +
+                    "select * from \n" +
+                    "(\n" +
+                    "select * /*+ INDEX(FBNK_STMT_ENTRY ACCT_NO_IDX)*/\n" +
+                    "/*+ parallel(16)  enable_parallel_dml */\n" +
+                    "from the(select cast(master.myStmtEntry(:tdate,:acc) as master.stmttype) from dual)\n" +
+                    "where to_date(substr(ttime, 1,6),'YYMMDD') between :fdate and :tdate\n" +
+                    ") a left outer join\n" +
+                    "(\n" +
+                    "select trn.*\n" +
+                    ",nvl(trn_mv.CREDIT_COMPANY_CODE,(select CO_code from W_ACCOUNT_STATIC_D@DATA21 where contract_code=trn.cr_acc_no and status='Y')) CREDIT_COMPANY_CODE\n" +
+                    ",nvl(trn_mv.DEBIT_COMPANY_CODE,(select CO_code from W_ACCOUNT_STATIC_D@DATA21 where contract_code=trn.dr_acc_no and status='Y')) DEBIT_COMPANY_CODE\n" +
+                    "from\n" +
+                    "(\n" +
+                    "select a.recid\n" +
+                    "--, extractValue(a.XMLRECORD,'/row/c67[@m=77]') mobile\n" +
+                    ", to_date(substr(extractValue(a.XMLRECORD,'/row/c222[position()=1]'),1,6),'YYMMDD') dtime\n" +
+                    ", extractValue(a.XMLRECORD,'/row/c2[position()=1]') as dr_acc_no\n" +
+                    ", extractValue(a.XMLRECORD,'/row/c11[position()=1]') as cr_acc_no\n" +
+                    "--,(select extractValue(b.XMLRECORD,'/row/c3[position()=1]') from master.FBNK_account b where b.recid= extractValue(a.XMLRECORD,'/row/c2[position()=1]') ) as Dr_account_name\n" +
+                    "from (select * from master.fbnk_funds_transfer a where extractValue(a.XMLRECORD,'/row/c2[position()=1]') =:acc\n" +
+                    "UNION ALL\n" +
+                    "select * from master.fbnk_funds_transfer a where extractValue(a.XMLRECORD,'/row/c11[position()=1]') =:acc) a\n" +
+                    "where /*extractValue(a.XMLRECORD,'/row/c67[@m=77]') is not null and */\n" +
+                    "to_date(substr(extractValue(a.XMLRECORD,'/row/c222[position()=1]'), 1,6),'YYMMDD') between :fdate and :tdate\n" +
+                    "\n" +
+                    "UNION\n" +
+                    "\n" +
+                    "select a.TXN_REF_NO recid\n" +
+                    "--, MMT_REF mobile\n" +
+                    ", a.BUSINESS_DATE dtime\n" +
+                    ",a.debit_acct_no as dr_acc_no\n" +
+                    ",a.credit_acct_no as cr_acc_no\n" +
+                    "from W_FUNDS_MVMT_TXN_F@DATA21 a\n" +
+                    "where (a.debit_acct_no=:acc or a.credit_acct_no=:acc )\n" +
+                    "--and MMT_REF is not null\n" +
+                    "and a.BUSINESS_DATE between :fdate and :tdate \n" +
+                    "\n" +
+                    "\n" +
+                    "union\n" +
+                    "\n" +
+                    "select dc.REF as recid\n" +
+                    ",to_date(substr(dc_det.date_time, 1,6),'YYMMDD') as dtime\n" +
+                    ",case when dc.sign='D' then dc.account_number else null end as dr_acc_no\n" +
+                    ",case when dc.sign='C' then dc.account_number else null end as cr_acc_no\n" +
+                    "from stage.EFZ_DATA_CAPTURE@DATA21 DC,stage.EFZ_DATA_CAPTURE_DETAILS@DATA21 dc_det\n" +
+                    "where dc.ref=dc_det.ref\n" +
+                    "and dc_det.m=1\n" +
+                    "and dc_det.s=1\n" +
+                    "and dc.account_number=:acc\n" +
+                    "and to_date(substr(dc_det.date_time, 1,6),'YYMMDD') between :fdate and :tdate \n" +
+                    ")trn, W_FUNDS_MVMT_TXN_F@DATA21 trn_mv where trn.recid=trn_mv.TXN_REF_NO\n" +
+                    "and trn_mv.BUSINESS_DATE between :fdate and :tdate \n" +
+                    "and (trn_mv.debit_acct_no=:acc or trn_mv.credit_acct_no=:acc )\n" +
+                    "\n" +
+                    ") b on nvl(substr(b.recid, 1, instr(b.recid,';',1,1)-1), b.recid) = nvl(substr(a.reference, 1, instr(a.reference,'\\',1,1)-1), a.reference)\n" +
+                    "order by to_number(date_time)\n" +
+                    ")stmt\n" +
+                    "\n"
     )
     List<Transaction> findTransactions(
-            @Param("startDate") String startDate,
-            @Param("endDate") String endDate,
-            @Param("accountNumber") String accountNumber);
+            @Param("fdate") String fDate,
+            @Param("tdate") String tDate,
+            @Param("acc") String acc);
 
 }

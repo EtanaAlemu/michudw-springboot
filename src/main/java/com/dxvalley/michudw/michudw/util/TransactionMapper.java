@@ -31,16 +31,27 @@ public class TransactionMapper {
 
     public TransactionResponse mapTransactionToResponse(Transaction transaction) {
         TransactionResponse response = modelMapper.map(transaction, TransactionResponse.class);
-        response.setBookDate(formatDate(transaction.getBookingDate()));
+        response.setBookDate(formatDate(transaction.getBookdate()));
         response.setReference(transaction.getReference());
         response.setDescript(transaction.getDescription());
-        response.setNarrative(transaction.getNarative());
-        response.setValueDate(formatDate(transaction.getValueDate()));
-        response.setDebit(transaction.getDebit());
-        response.setCredit(transaction.getCredit());
-        response.setFrom(transaction.getDebitAcctNo());
-        response.setTo(transaction.getTo());
-        response.setClosingBalance(transaction.getClosingBalance());
+        response.setNarrative(transaction.getDescription());
+        response.setValueDate(formatDate(transaction.getValuedate()));
+        try{
+            float amount = Float.parseFloat(transaction.getAmount());
+
+            if(amount>=0){
+                response.setDebit(null);
+                response.setCredit(String.valueOf(amount));
+            } else{
+                response.setDebit(String.valueOf(amount));
+                response.setCredit(null);
+            }
+        } catch (Exception e){
+            throw e;
+        }
+        response.setFrom(transaction.getDrAccNo());
+        response.setTo(transaction.getCrAccNo());
+        response.setClosingBalance(transaction.getCbal());
         return response;
     }
 
