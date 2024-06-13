@@ -2,9 +2,11 @@ package com.dxvalley.michudw.michudw.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-
+import lombok.Getter;
+import lombok.Setter;
 @Entity
-@Data
+@Getter
+@Setter
 public class Transaction {
     private String bookdate;
     @Id
@@ -15,7 +17,7 @@ public class Transaction {
     private String obal;
     private String amount;
     private String cbal;
-    private String date_time;
+    private String dateTime;
     private String curr;
     private String fcyamt;
     private String rate;
@@ -30,5 +32,4 @@ public class Transaction {
     private String crAccountName;
     private String debitBrName;
     private String creditBrName;
-
 }

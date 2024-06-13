@@ -3,6 +3,7 @@ package com.dxvalley.michudw.michudw.util;
 import com.dxvalley.michudw.michudw.dto.TransactionResponse;
 import com.dxvalley.michudw.michudw.model.Transaction;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,11 +16,8 @@ import java.util.List;
 import java.util.Locale;
 
 @Component
-@AllArgsConstructor
 public class TransactionMapper {
 
-    @Autowired
-    private ModelMapper modelMapper;
 
     public List<TransactionResponse> mapTransactionsToResponse(List<Transaction> transactions) {
         List<TransactionResponse> transactionResponses = new ArrayList<>();
@@ -30,23 +28,25 @@ public class TransactionMapper {
     }
 
     public TransactionResponse mapTransactionToResponse(Transaction transaction) {
-        TransactionResponse response = modelMapper.map(transaction, TransactionResponse.class);
-        response.setBookDate(formatDate(transaction.getBookdate()));
+        TransactionResponse response = new TransactionResponse();
+        response.setBookDate(transaction.getBookdate());
         response.setReference(transaction.getReference());
         response.setDescript(transaction.getDescription());
         response.setNarrative(transaction.getDescription());
         response.setValueDate(formatDate(transaction.getValuedate()));
-        try{
+
+
+        try {
             float amount = Float.parseFloat(transaction.getAmount());
 
-            if(amount>=0){
+            if (amount >= 0) {
                 response.setDebit(null);
-                response.setCredit(String.valueOf(amount));
-            } else{
-                response.setDebit(String.valueOf(amount));
+                response.setCredit(transaction.getAmount());
+            } else {
+                response.setDebit(transaction.getAmount());
                 response.setCredit(null);
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             throw e;
         }
         response.setFrom(transaction.getDrAccNo());

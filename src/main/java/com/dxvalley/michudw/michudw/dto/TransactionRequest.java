@@ -1,9 +1,12 @@
 package com.dxvalley.michudw.michudw.dto;
 
-import lombok.Data;
+import lombok.*;
 
 import java.util.Date;
-@Data
+
+@Getter
+@Setter
+@ToString
 public class TransactionRequest {
     private String startDate;
     private String endDate;

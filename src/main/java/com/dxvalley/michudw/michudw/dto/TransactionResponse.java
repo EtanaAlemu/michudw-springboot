@@ -1,9 +1,12 @@
 package com.dxvalley.michudw.michudw.dto;
 
-import lombok.Data;
+import lombok.*;
 
 
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class TransactionResponse {
     private String bookDate;
     private String reference;
