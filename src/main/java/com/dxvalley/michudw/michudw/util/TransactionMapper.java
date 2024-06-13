@@ -29,7 +29,7 @@ public class TransactionMapper {
 
     public TransactionResponse mapTransactionToResponse(Transaction transaction) {
         TransactionResponse response = new TransactionResponse();
-        response.setBookDate(transaction.getBookdate());
+        response.setBookDate(formatDate(transaction.getBookdate()));
         response.setReference(transaction.getReference());
         response.setDescript(transaction.getDescription());
         response.setNarrative(transaction.getDescription());
